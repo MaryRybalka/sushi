@@ -46,7 +46,7 @@ class SushiShopController extends AbstractController
     }
 
     /**
-     * @Route("/", name="shopList")
+     * @Route("/list", name="shopList")
      * @return Response
      */
     public function shopList(): Response
@@ -71,7 +71,7 @@ class SushiShopController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();//
         $sessionID = $this->session->getId();
-        if (!$em->getRepository(ShopCart::class)->findBy(['sessionID'=>$sessionID]).isEmpty()){
+        if ($em->getRepository(ShopCart::class)->findBy(['sessionID'=>$sessionID]) != null){
             $shopCart = (new ShopCart())
                 ->addItemList($item)
                 ->setSessionID($sessionID);
@@ -84,14 +84,14 @@ class SushiShopController extends AbstractController
     }
 
     /**
-     * @Route("/", name="shopCartDelete")
+     * @Route("/delete", name="shopCartDelete")
      * @return Response
      */
     public function shopCartClean(): Response
     {
        $sessionID = $this->session->getId();
        $entityManager = $this->getDoctrine()->getManager();
-       if (!$entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]).isEmpty())
+       if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]) != null)
        {
            $entityManager->remove();
        $entityManager->flush();
@@ -100,21 +100,25 @@ class SushiShopController extends AbstractController
     }
 
     /**
-     * @Route("/cart/count}", name="shopCartCount")
+     * @Route("/cart/count", name="shopCartCount")
      * @return Response
      */
     public function countCalories(): Response
     {
         $em = $this->getDoctrine()->getManager();
         $calories = 0;
-        $items = $em->getRepository(ShopItem::class)->findAll();
-        foreach($items as $item){
-            $item_type = $item->getType();
-            $item_type_id = $item->getTypeId();
+        $sessionID = $this->session->getId();
+        if ($em->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]) != null){
+            $items_in_cart = $em->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID])->getItemList();
 
-            $class_name = ($item_type == "gunkan")? "Gunkan" : "Sashimi";
-            $repository = $em->getRepository($class_name."Repository::class");
-            $calories = $calories + $repository->find($item_type_id)->getCalories();
+            foreach($items_in_cart as $item){
+                $item_type = $item->getType();
+                $item_type_id = $item->getTypeId();
+
+                $class_name = ($item_type == "gunkan")? "Gunkan" : "Sashimi";
+                $repository = $em->getRepository($class_name."Repository::class");
+                $calories = $calories + $repository->find($item_type_id)->getCalories();
+            }
         }
         return $this->redirectToRoute('shopCart', ['calories'=>$calories]);
     }
@@ -127,6 +131,7 @@ class SushiShopController extends AbstractController
     {
         return $this->render('index/shopItem.html.twig', [
             'title' => $item->getTitle(),
+            'type' => $item->getType(),
             'price' => $item->getPrice(),
             'id' => $item->getId(),
             'image_id'=>$item->getId(),
@@ -142,8 +147,9 @@ class SushiShopController extends AbstractController
         $sessionID = $this->session->getId();
 
         $entityManager = $this->getDoctrine()->getManager();
-        $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID])->getItemList();;
-
+        if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]) != null) {
+            $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();;
+        } else $items = [];
         return $this->render('index/shopCart.html.twig', [
             'title' => 'CART',
             'items' => $items,
