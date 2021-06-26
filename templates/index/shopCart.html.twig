@@ -32,9 +32,10 @@
         {% endfor %}
         <hr>
         <h4>Summ: {{ sum }} </h4>
-        <a href="{{path('shopCartCount')}}" class="btn btn-success mt-2" style="width: 200px">Count calories</a>
         <hr>
         <h4>Calories: {{ calories }} </h4>
+        <a href="{{path('shopCartCount')}}" class="btn btn-success mt-2" style="width: 200px">Count calories</a>
+        <hr>
         <a href="{{path('shopCartDelete')}}" class="btn btn-success mt-2" style="width: 200px">Remove all</a>
     </div>
 {% endblock %}

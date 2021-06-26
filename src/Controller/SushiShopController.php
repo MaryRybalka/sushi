@@ -71,16 +71,16 @@ class SushiShopController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();//
         $sessionID = $this->session->getId();
-        if ($em->getRepository(ShopCart::class)->findBy(['sessionID'=>$sessionID]) != null){
+        if ($em->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]) != null) {
+            $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->addItemList($item);
+        } else {
             $shopCart = (new ShopCart())
                 ->addItemList($item)
                 ->setSessionID($sessionID);
             $em->persist($shopCart);
             $em->flush();
-        }else{
-            $em->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID])->addItemList($item);
         }
-        return $this->redirectToRoute('shopItem', ['id'=>$item->getID()]);
+        return $this->redirectToRoute('shopItem', ['id' => $item->getID()]);
     }
 
     /**
@@ -89,14 +89,13 @@ class SushiShopController extends AbstractController
      */
     public function shopCartClean(): Response
     {
-       $sessionID = $this->session->getId();
-       $entityManager = $this->getDoctrine()->getManager();
-       if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]) != null)
-       {
-           $entityManager->remove();
-       $entityManager->flush();
-       }
-       return $this->redirectToRoute('shopList');
+        $sessionID = $this->session->getId();
+        $entityManager = $this->getDoctrine()->getManager();
+        if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]) != null) {
+            $entityManager->remove($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]));
+            $entityManager->flush();
+        }
+        return $this->redirectToRoute('shopList');
     }
 
     /**
@@ -108,20 +107,22 @@ class SushiShopController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $calories = 0;
         $sessionID = $this->session->getId();
-        if ($em->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]) != null){
-            $items_in_cart = $em->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID])->getItemList();
+        if ($em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]) != null) {
+            $items_in_cart = $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();
 
-            foreach($items_in_cart as $item){
+            foreach ($items_in_cart as $item) {
                 $item_type = $item->getType();
                 $item_type_id = $item->getTypeId();
 
-                $class_name = ($item_type == "gunkan")? "Gunkan" : "Sashimi";
-                $repository = $em->getRepository($class_name."Repository::class");
-                $calories = $calories + $repository->find($item_type_id)->getCalories();
+                ($item_type == "gunkan") ? $repository = $em->getRepository(Gunkan::class) : $repository = $em->getRepository(Sashimi::class);
+
+                dd($repository->find($item_type_id)->getCalories());
+//                $calories = $calories + $repository->find($item_type_id)->getCalories();
             }
         }
-        return $this->redirectToRoute('shopCart', ['calories'=>$calories]);
+        return $this->redirectToRoute('shopCart', ['calories' => $calories]);
     }
+
     /**
      * @Route("/item/{id<\d+>}", name="shopItem")
      * @param ShopItem $item
@@ -134,7 +135,7 @@ class SushiShopController extends AbstractController
             'type' => $item->getType(),
             'price' => $item->getPrice(),
             'id' => $item->getId(),
-            'image_id'=>$item->getId(),
+            'image_id' => $item->getId(),
         ]);
     }
 
@@ -147,7 +148,7 @@ class SushiShopController extends AbstractController
         $sessionID = $this->session->getId();
 
         $entityManager = $this->getDoctrine()->getManager();
-        if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]) != null) {
+        if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]) != null) {
             $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();;
         } else $items = [];
         return $this->render('index/shopCart.html.twig', [

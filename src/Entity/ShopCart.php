@@ -59,10 +59,12 @@ class ShopCart
         return $this->ItemList;
     }
 
-    public function addItemList(ShopItem $itemList): self
+    public function addItemList(ShopItem $item): self
     {
-        if (!$this->ItemList->contains($itemList)) {
-            $this->ItemList[] = $itemList;
+        if (!$this->ItemList->contains($item)) {
+            $this->ItemList->add($item);
+        } else {
+            $this->ItemList[] = $item;
         }
 
         return $this;
