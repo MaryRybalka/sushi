@@ -25,10 +25,14 @@ class ShopCart
     private $sessionID;
 
     /**
-     * @ORM\ManyToOne(targetEntity=CartItem::class, inversedBy="CartID")
+     * @ORM\ManyToMany(targetEntity=ShopItem::class, inversedBy="shopCarts")
      */
-    private $ItemsList;
+    private $ItemList;
 
+    public function __construct()
+    {
+        $this->ItemList = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -47,16 +51,27 @@ class ShopCart
         return $this;
     }
 
-    public function getItemsList(): ?CartItem
+    /**
+     * @return Collection|ShopItem[]
+     */
+    public function getItemList(): Collection
     {
-        return $this->ItemsList;
+        return $this->ItemList;
     }
 
-    public function setItemsList(?CartItem $ItemsList): self
+    public function addItemList(ShopItem $itemList): self
     {
-        $this->ItemsList = $ItemsList;
+        if (!$this->ItemList->contains($itemList)) {
+            $this->ItemList[] = $itemList;
+        }
 
         return $this;
     }
 
+    public function removeItemList(ShopItem $itemList): self
+    {
+        $this->ItemList->removeElement($itemList);
+
+        return $this;
+    }
 }

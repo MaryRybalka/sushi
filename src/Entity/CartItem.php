@@ -20,25 +20,14 @@ class CartItem
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $entityItem;
-
-    /**
-     * @ORM\OneToMany(targetEntity=ShopCart::class, mappedBy="ItemsList")
+     * @ORM\Column(type="integer")
      */
     private $CartID;
 
     /**
-     * @ORM\OneToMany(targetEntity=ShopItem::class, mappedBy="CartList")
+     * @ORM\Column(type="integer")
      */
     private $ItemID;
-
-    public function __construct()
-    {
-        $this->CartID = new ArrayCollection();
-        $this->ItemID = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -52,53 +41,12 @@ class CartItem
         return $this;
     }
 
-
-    public function getEntityItem(): ?string
-    {
-        return $this->entityItem;
-    }
-
-    public function setEntityItem(string $entityItem): self
-    {
-        $this->entityItem = $entityItem;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|ShopCart[]
-     */
-    public function getCartID(): Collection
+    public function getCartID(): int
     {
         return $this->CartID;
     }
 
-    public function addCartID(ShopCart $cartID): self
-    {
-        if (!$this->CartID->contains($cartID)) {
-            $this->CartID[] = $cartID;
-            $cartID->setItemsList($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCartID(ShopCart $cartID): self
-    {
-        if ($this->CartID->removeElement($cartID)) {
-            // set the owning side to null (unless already changed)
-            if ($cartID->getItemsList() === $this) {
-                $cartID->setItemsList(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|ShopItem[]
-     */
-    public function getItemID(): Collection
+    public function getItemID(): int
     {
         return $this->ItemID;
     }
@@ -119,6 +67,28 @@ class CartItem
             // set the owning side to null (unless already changed)
             if ($itemID->getCartList() === $this) {
                 $itemID->setCartList(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addCartID(ShopCart $cartID): self
+    {
+        if (!$this->CartID->contains($cartID)) {
+            $this->CartID[] = $cartID;
+            $cartID->addItemID($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCartID(ShopCart $cartID): self
+    {
+        if ($this->CartID->removeElement($cartID)) {
+            // set the owning side to null (unless already changed)
+            if ($cartID->getItemsList() === $this) {
+                $cartID->setItemsList(null);
             }
         }
 

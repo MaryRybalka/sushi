@@ -4,16 +4,19 @@ namespace App\Controller;
 
 use App\Entity\ShopCart;
 use App\Entity\ShopItem;
+use App\Repository\CartItemRepository;
 use App\Repository\GunkanRepository;
 use App\Repository\SashimiRepository;
 use App\Repository\ShopCartRepository;
 use App\Repository\ShopItemRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use function PHPUnit\Framework\isEmpty;
 
 class SushiShopController extends AbstractController
 {
@@ -32,7 +35,7 @@ class SushiShopController extends AbstractController
 
 
     /**
-     * @Route("/sushi", name="index")
+     * @Route("/", name="index")
      * @return Response
      */
     public function index(): Response
@@ -41,12 +44,16 @@ class SushiShopController extends AbstractController
             'controller_name' => 'SushiShopController',
         ]);
     }
+
     /**
-     * @Route("/sushi/list", name="shopList")
+     * @Route("/list", name="shopList")
      * @return Response
      */
-    public function shopList(ShopItemRepository $itemRepository): Response
+    public function shopList(): Response
     {
+//        ShopItemRepository $itemRepository
+
+        $itemRepository = $this->getDoctrine()->getRepository(ShopItem::class);
         $items = $itemRepository->findAll();
 
         return $this->render('index/shopList.html.twig', [
@@ -56,7 +63,7 @@ class SushiShopController extends AbstractController
     }
 
     /**
-     * @Route("/sushi/cart/add/{item<\d+>}", name="shopCartAdd")
+     * @Route("/cart/add/{item<\d+>}", name="shopCartAdd")
      * @param ShopItem $item
      * @return Response
      */
@@ -64,29 +71,33 @@ class SushiShopController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();//
         $sessionID = $this->session->getId();
-        $shopCart = (new ShopCart())
-            ->setItemsList($item)
-            ->setSessionID($sessionID);
-        $em->persist($shopCart);
-        $em->flush();
+        if (!$em->getRepository(ShopCart::class)->findBy(['sessionID'=>$sessionID]).isEmpty()){
+            $shopCart = (new ShopCart())
+                ->addItemList($item)
+                ->setSessionID($sessionID);
+            $em->persist($shopCart);
+            $em->flush();
+        }else{
+            $em->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID])->addItemList($item);
+        }
         return $this->redirectToRoute('shopItem', ['id'=>$item->getID()]);
     }
 
     /**
-     * @Route("/sushi/cart/delete", name="shopCartDelete")
+     * @Route("/cart/delete", name="shopCartDelete")
      * @return Response
      */
     public function shopCartClean(): Response
     {
-//       $entityManager = $this->getDoctrine()->getManager();
-//       $entityManager->remove($item);
-//       $entityManager->flush();
-       $this->session->migrate();
+       $sessionID = $this->session->getId();
+       $entityManager = $this->getDoctrine()->getManager();
+       $entityManager->remove($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]));
+       $entityManager->flush();
        return $this->redirectToRoute('shopList');
     }
 
     /**
-     * @Route("/sushi/cart/count}", name="shopCartCount")
+     * @Route("/cart/count}", name="shopCartCount")
      * @return Response
      */
     public function countCalories(): Response
@@ -95,17 +106,19 @@ class SushiShopController extends AbstractController
 
         $em = $this->getDoctrine()->getManager();
         $calories = 0;
-        $items = $itemRepository->findAll();
+        $items = $em->getRepository(ShopItem::class)->findAll();
         foreach($items as $item){
             $item_type = $item->getType();
             $item_type_id = $item->getTypeId();
-            ($item_type == "gunkan")? $repository = new GunkanRepository() : $repository = new SashimiRepository();
+
+            $class_name = ($item_type == "gunkan")? "Gunkan" : "Sashimi";
+            $repository = $em->getRepository($class_name."Repository::class");
             $calories = $calories + $repository->find($item_type_id)->getCalories();
         }
         return $this->redirectToRoute('shopCart', ['calories'=>$calories]);
     }
     /**
-     * @Route("/sushi/item/{item<\d+>}", name="shopItem")
+     * @Route("/item}", name="shopItem")
      * @param ShopItem $item
      * @return Response
      */
@@ -115,22 +128,23 @@ class SushiShopController extends AbstractController
             'title' => $item->getTitle(),
             'price' => $item->getPrice(),
             'id' => $item->getId(),
+            'image_id'=>$item->getId(),
         ]);
     }
 
     /**
-     * @Route("/sushi/cart", name="shopCart")
-     * @param ShopCartRepository $cartRepository
+     * @Route("/cart", name="shopCart")
+     * @param CartItemRepository $cartItemRepository
      * @return Response
      */
     public function shopCart(ShopCartRepository $cartRepository): Response
     {
         $session = $this->session->getId();
-        $items = $cartRepository->findBy(['sessionID'=>$session]);
-
+        $items = $cartRepository->findBySessionID($session)->getItemList();
         return $this->render('index/shopCart.html.twig', [
             'title' => 'CART',
-            'items'=>$items,
+            'items' => $items,
+            'calories' => 0,
         ]);
     }
 

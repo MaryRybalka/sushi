@@ -19,22 +19,19 @@ class ShopCartRepository extends ServiceEntityRepository
         parent::__construct($registry, ShopCart::class);
     }
 
-    // /**
-    //  * @return ShopCart[] Returns an array of ShopCart objects
-    //  */
-    /*
-    public function findByExampleField($value)
+     /**
+      * @return ShopCart Returns an ShopCart object
+      */
+    public function findBySessionID($value)
     {
         return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
+            ->andWhere('s.sessionID = :val')
             ->setParameter('val', $value)
-            ->orderBy('s.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
 
     /*
     public function findOneBySomeField($value): ?ShopCart

@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\ShopItemRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=ShopItemRepository::class)
  */
-class ShopItem extends \App\Entity\CartItem
+class ShopItem
 {
     /**
      * @ORM\Id
@@ -31,6 +33,21 @@ class ShopItem extends \App\Entity\CartItem
      * @ORM\Column(type="string", length=255)
      */
     private $type;
+
+    /**
+     * @ORM\Column(type="integer", length=255)
+     */
+    private $typeId;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=ShopCart::class, mappedBy="ItemList")
+     */
+    private $shopCarts;
+
+    public function __construct()
+    {
+        $this->shopCarts = new ArrayCollection();
+    }
 
     /**
      * @return mixed
@@ -64,16 +81,6 @@ class ShopItem extends \App\Entity\CartItem
         $this->typeId = $typeId;
     }
 
-    /**
-     * @ORM\Column(type="integer", length=255)
-     */
-    private $typeId;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=CartItem::class, inversedBy="ItemID")
-     */
-    private $CartList;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -103,14 +110,29 @@ class ShopItem extends \App\Entity\CartItem
         return $this;
     }
 
-    public function getCartList(): ?CartItem
+    /**
+     * @return Collection|ShopCart[]
+     */
+    public function getShopCarts(): Collection
     {
-        return $this->CartList;
+        return $this->shopCarts;
     }
 
-    public function setCartList(?CartItem $CartList): self
+    public function addShopCart(ShopCart $shopCart): self
     {
-        $this->CartList = $CartList;
+        if (!$this->shopCarts->contains($shopCart)) {
+            $this->shopCarts[] = $shopCart;
+            $shopCart->addItemList($this);
+        }
+
+        return $this;
+    }
+
+    public function removeShopCart(ShopCart $shopCart): self
+    {
+        if ($this->shopCarts->removeElement($shopCart)) {
+            $shopCart->removeItemList($this);
+        }
 
         return $this;
     }

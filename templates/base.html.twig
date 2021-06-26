@@ -14,18 +14,13 @@
             crossorigin="anonymous"></script>
     {# end include bootstrap #}
     {% block stylesheets %}
-        {# {{ encore_entry_link_tags('app') }} #}
-    {% endblock %}
-
-    {% block javascripts %}
-        {# {{ encore_entry_script_tags('app') }} #}
     {% endblock %}
 </head>
 <body>
 <header>
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">Fixed navbar</a>
+            <a class="navbar-brand" href="#">Welcome to Sushi Shop</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
                     aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -33,10 +28,10 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item {{ app.request.get('_rote') == 'index' ? 'active' }}">
-                        <a class="nav-link" href="{{ path ('index') }}">Sushi</a>
+                        <a class="nav-link" href="{{ path ('index') }}">Index</a>
                     </li>
                     <li class="nav-item {{ app.request.get('_rote') == 'shopList' ? 'active' }}">
-                        <a class="nav-link" href="{{ path ('shopList') }}">Link</a>
+                        <a class="nav-link" href="{{ path ('shopList') }}">Sushi</a>
                     </li>
 
                 </ul>
