@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SushiShopController!{% endblock %}
+{% block title %}SushiShop{% endblock %}
 
 {% block body %}
 <style>
@@ -19,7 +19,7 @@
                 <hr>
                 <hr>
                 <h3 class="mb-1">{{ price }} $</h3>
-                <a href="{{path('shopCartAdd', {'item': id})}}" class="btn btn-success mt-2" style="width: 200px">Add to cart</a>
+                <a href="{{path('shopCartAdd', {'item': id})}}" class="btn btn-success mt-2" style="width: 200px; background-color: #708040!important">Add to cart</a>
             </div>
         </div>
 </div>

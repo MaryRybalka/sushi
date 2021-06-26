@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\ShopCart;
 use App\Entity\ShopItem;
+use App\Entity\Gunkan;
+use App\Entity\Sashimi;
 use App\Repository\CartItemRepository;
 use App\Repository\GunkanRepository;
 use App\Repository\SashimiRepository;
@@ -71,13 +73,20 @@ class SushiShopController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();//
         $sessionID = $this->session->getId();
+        $cal = 0;
         if ($em->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]) == null) {
-            $shopCart = (new ShopCart())
-                ->addItemList($item)
-                ->setSessionID($sessionID);
+            $shopCart = (new ShopCart());
+            $shopCart->setSessionID($sessionID);
+            $shopCart->addItemList($item);
+            $shopCart->setAllCal($cal);
             $em->persist($shopCart);
         } else {
-            $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->addItemList($item);
+            $already_ex = $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();
+            $flag = true;
+            foreach ($already_ex as $it){
+                if ($it->getId() == $item->getId()) $flag = false;
+            }
+            if ($flag) $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->addItemList($item);
         }
         $em->flush();
         return $this->redirectToRoute('shopItem', ['id' => $item->getID()]);
@@ -95,6 +104,7 @@ class SushiShopController extends AbstractController
             $entityManager->remove($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]));
             $entityManager->flush();
         }
+        $this->all_calories = 0;
         return $this->redirectToRoute('shopList');
     }
 
@@ -107,6 +117,7 @@ class SushiShopController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $calories = 0;
         $sessionID = $this->session->getId();
+
         if ($em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]) != null) {
             $items_in_cart = $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();
 
@@ -114,13 +125,16 @@ class SushiShopController extends AbstractController
                 $item_type = $item->getType();
                 $item_type_id = $item->getTypeId();
 
-                ($item_type == "gunkan") ? $repository = $em->getRepository(Gunkan::class) : $repository = $em->getRepository(Sashimi::class);
-
-                dd($repository->find($item_type_id)->getCalories());
-//                $calories = $calories + $repository->find($item_type_id)->getCalories();
+                ($item_type == "gunkan") ? $repository = $em->getRepository(Gunkan::class)->find(['id'=>$item_type_id]) : $repository = $em->getRepository(Sashimi::class)->find(['id'=>$item_type_id]);
+                $calories = $calories + $repository->getCalories();
             }
+            $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->setAllCal($calories);
+            $em->flush();
         }
-        return $this->redirectToRoute('shopCart', ['calories' => $calories]);
+        $this->all_calories = $calories;
+
+
+        return $this->redirectToRoute('shopCart');
     }
 
     /**
@@ -146,17 +160,18 @@ class SushiShopController extends AbstractController
     public function shopCart(): Response //ShopCartRepository $cartRepository
     {
         $sessionID = $this->session->getId();
-
         $entityManager = $this->getDoctrine()->getManager();
+        $calories = 0;
         if ($entityManager->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]) != null) {
-            $entityManager->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]);
+            $calories = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getAllCal();
+
             $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();
         } else $items = [];
-//        dd($items);
+
         return $this->render('index/shopCart.html.twig', [
             'title' => 'CART',
             'items' => $items,
-            'calories' => 0,
+            'calories' => $calories,
         ]);
     }
 

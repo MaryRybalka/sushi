@@ -2,6 +2,10 @@
 
 namespace App\Entity;
 
+use App\Entity\Gunkan;
+use App\Entity\Sashimi;
+use App\Repository\GunkanRepository;
+use App\Repository\SashimiRepository;
 use App\Repository\ShopItemRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -136,4 +140,13 @@ class ShopItem
 
         return $this;
     }
+//
+//    public function getCalories(): int
+//    {
+//        $em = $this->getDoctrine()->getManager();
+//        if ($this->type == "gunkan")
+//            return $em->getRepository(Gunkan::class)->find(['id'=>$this->typeId]);
+//        else
+//            return $em->getRepository(Sashimi::class)->find(['id'=>$this->typeId]);
+//    }
 }

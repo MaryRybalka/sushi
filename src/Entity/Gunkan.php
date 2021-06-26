@@ -27,6 +27,15 @@ class Gunkan
      */
     private $calories;
 
+    /**
+     * @param mixed $id
+     */
+
+    public function __construct($id)
+    {
+        $this->id = $id;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

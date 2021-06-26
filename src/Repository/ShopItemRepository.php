@@ -18,19 +18,15 @@ class ShopItemRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ShopItem::class);
     }
-//
+
 //     /**
 //      * @return ShopItem[] Returns an array of ShopItem objects
 //      */
-//    public function findByType($value)
+//    public function getCal($value)
 //    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.type = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->getQuery()
-//            ->getResult()
-//        ;
+//        $em = $this->getEntityManager()->getRepository(Gunkan::class);
+//        return $em->find(['id'=>$value])->getCalories();
+//
 //    }
 
 

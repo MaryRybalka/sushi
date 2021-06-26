@@ -29,6 +29,27 @@ class ShopCart
      */
     private $ItemList;
 
+    /**
+     * @ORM\Column(type="integer", length=255)
+     */
+    private $allCal;
+
+    /**
+     * @return mixed
+     */
+    public function getAllCal()
+    {
+        return $this->allCal;
+    }
+
+    /**
+     * @param mixed $allCal
+     */
+    public function setAllCal($allCal): void
+    {
+        $this->allCal = $allCal;
+    }
+
     public function __construct()
     {
         $this->ItemList = new ArrayCollection();

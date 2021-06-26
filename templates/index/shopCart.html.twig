@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SushiShopController!{% endblock %}
+{% block title %}SushiShop{% endblock %}
 
 {% block body %}
     <style>
@@ -31,11 +31,11 @@
             </div>
         {% endfor %}
         <hr>
-        <h4>Summ: {{ sum }} </h4>
+        <h4>Summ: {{ sum }}$ </h4>
         <hr>
         <h4>Calories: {{ calories }} </h4>
-        <a href="{{path('shopCartCount')}}" class="btn btn-success mt-2" style="width: 200px">Count calories</a>
+        <a href="{{path('shopCartCount')}}" class="btn btn-success mt-2" style="width: 200px;background-color: #708040!important">Count calories</a>
         <hr>
-        <a href="{{path('shopCartDelete')}}" class="btn btn-success mt-2" style="width: 200px">Remove all</a>
+        <a href="{{path('shopCartDelete')}}" class="btn btn-sm btn-outline-secondary" style="width: 200px">Remove all</a>
     </div>
 {% endblock %}
