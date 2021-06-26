@@ -1,9 +1,9 @@
 index:
     path: /
-    controller: App\Controller\SushiShopController::shopItem
+    controller: App\Controller\SushiShopController::shopList
 shopList:
   path: /list/
   controller: App\Controller\SushiShopController::index
 shopItem:
   path: /item/
-  controller: App\Controller\SushiShopController::shopList
+  controller: App\Controller\SushiShopController::shopItem
