@@ -1,0 +1,6 @@
+index:
+    path: /
+    controller: App\Controller\SushiShopController::index
+app_sushi_shop:
+  path: /sushishop
+  controller: App\Controller\SushiShopController::index
