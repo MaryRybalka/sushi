@@ -35,7 +35,7 @@ class SushiShopController extends AbstractController
 
 
     /**
-     * @Route("/", name="index")
+     * @Route("/index", name="index")
      * @return Response
      */
     public function index(): Response
@@ -46,7 +46,7 @@ class SushiShopController extends AbstractController
     }
 
     /**
-     * @Route("/list", name="shopList")
+     * @Route("/", name="shopList")
      * @return Response
      */
     public function shopList(): Response
@@ -84,15 +84,18 @@ class SushiShopController extends AbstractController
     }
 
     /**
-     * @Route("/cart/delete", name="shopCartDelete")
+     * @Route("/", name="shopCartDelete")
      * @return Response
      */
     public function shopCartClean(): Response
     {
        $sessionID = $this->session->getId();
        $entityManager = $this->getDoctrine()->getManager();
-       $entityManager->remove($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]));
+       if (!$entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID]).isEmpty())
+       {
+           $entityManager->remove();
        $entityManager->flush();
+       }
        return $this->redirectToRoute('shopList');
     }
 
@@ -102,8 +105,6 @@ class SushiShopController extends AbstractController
      */
     public function countCalories(): Response
     {
-        $itemRepository = new ShopItemRepository();
-
         $em = $this->getDoctrine()->getManager();
         $calories = 0;
         $items = $em->getRepository(ShopItem::class)->findAll();
@@ -118,7 +119,7 @@ class SushiShopController extends AbstractController
         return $this->redirectToRoute('shopCart', ['calories'=>$calories]);
     }
     /**
-     * @Route("/item}", name="shopItem")
+     * @Route("/item/{id<\d+>}", name="shopItem")
      * @param ShopItem $item
      * @return Response
      */
@@ -134,13 +135,15 @@ class SushiShopController extends AbstractController
 
     /**
      * @Route("/cart", name="shopCart")
-     * @param CartItemRepository $cartItemRepository
      * @return Response
      */
-    public function shopCart(ShopCartRepository $cartRepository): Response
+    public function shopCart(): Response //ShopCartRepository $cartRepository
     {
-        $session = $this->session->getId();
-        $items = $cartRepository->findBySessionID($session)->getItemList();
+        $sessionID = $this->session->getId();
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID'=>$sessionID])->getItemList();;
+
         return $this->render('index/shopCart.html.twig', [
             'title' => 'CART',
             'items' => $items,

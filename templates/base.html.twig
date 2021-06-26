@@ -27,9 +27,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item {{ app.request.get('_rote') == 'index' ? 'active' }}">
-                        <a class="nav-link" href="{{ path ('index') }}">Index</a>
-                    </li>
                     <li class="nav-item {{ app.request.get('_rote') == 'shopList' ? 'active' }}">
                         <a class="nav-link" href="{{ path ('shopList') }}">Sushi</a>
                     </li>
