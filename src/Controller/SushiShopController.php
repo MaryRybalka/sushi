@@ -71,15 +71,15 @@ class SushiShopController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();//
         $sessionID = $this->session->getId();
-        if ($em->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]) != null) {
-            $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->addItemList($item);
-        } else {
+        if ($em->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]) == null) {
             $shopCart = (new ShopCart())
                 ->addItemList($item)
                 ->setSessionID($sessionID);
             $em->persist($shopCart);
-            $em->flush();
+        } else {
+            $em->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->addItemList($item);
         }
+        $em->flush();
         return $this->redirectToRoute('shopItem', ['id' => $item->getID()]);
     }
 
@@ -148,9 +148,11 @@ class SushiShopController extends AbstractController
         $sessionID = $this->session->getId();
 
         $entityManager = $this->getDoctrine()->getManager();
-        if ($entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID]) != null) {
-            $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();;
+        if ($entityManager->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]) != null) {
+            $entityManager->getRepository(ShopCart::class)->findBy(['sessionID' => $sessionID]);
+            $items = $entityManager->getRepository(ShopCart::class)->findOneBy(['sessionID' => $sessionID])->getItemList();
         } else $items = [];
+//        dd($items);
         return $this->render('index/shopCart.html.twig', [
             'title' => 'CART',
             'items' => $items,
